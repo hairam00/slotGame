@@ -52,12 +52,13 @@ export class SlotMachineScene extends Phaser.Scene {
     private updateLayout(): void {
         const gameWidth = this.cameras.main.width;
         const gameHeight = this.cameras.main.height;
-
+    
         this.reelWidth = gameWidth * 0.2;
-        this.reelHeight = gameHeight * 0.4;
-        this.xSpacing = this.reelWidth * 0.2;
-        this.ySpacing = this.reelHeight * 0.1;
-
+        this.reelHeight = gameHeight * 0.3; // Increased height
+        
+        this.xSpacing = this.reelWidth * 0.1; // Reduced horizontal spacing
+        this.ySpacing = this.reelHeight * 0.01; // Reduced vertical spacing
+    
         this.startX = (gameWidth - (this.reelWidth + this.xSpacing) * 3) / 2;
         this.startY = (gameHeight - (this.reelHeight + this.ySpacing) * 3) / 2;
     }
@@ -68,29 +69,28 @@ export class SlotMachineScene extends Phaser.Scene {
         const boxX = this.startX - 10; // Padding around the box
         const boxY = this.startY - 10;
 
-        // Create a box with casino-themed design
         this.reelsBox = this.add.graphics();
         this.reelsBox.fillStyle(0x000000, 0.8); // Semi-transparent black background
         this.reelsBox.fillRect(boxX, boxY, boxWidth, boxHeight);
         this.reelsBox.lineStyle(4, 0xffd700, 1); // Gold border
         this.reelsBox.strokeRect(boxX, boxY, boxWidth, boxHeight);
-    }
+    }    
 
     private initializeReels(): void {
         const numRows = 3;
         const numCols = 3;
-
+    
         for (let row = 0; row < numRows; row++) {
             this.reels[row] = [];
             for (let col = 0; col < numCols; col++) {
-                const x = this.startX + col * (this.reelWidth + this.xSpacing);
-                const y = this.startY + row * (this.reelHeight + this.ySpacing);
-                const reel = this.add.sprite(x, y, 'symbol1');
+                const x = this.startX + col * (this.reelWidth + this.xSpacing) + this.reelWidth / 2;
+                const y = this.startY + row * (this.reelHeight + this.ySpacing) + this.reelHeight / 2;
+                const reel = this.add.sprite(x, y, 'symbol1').setOrigin(0.5, 0.5);
                 this.reels[row].push(reel);
             }
         }
     }
-
+    
     private addSpinButton(): void {
         const buttonWidth = 100; // Adjust width of the spin button
         const buttonHeight = 120; // Adjust height of the spin button
@@ -149,7 +149,7 @@ export class SlotMachineScene extends Phaser.Scene {
                     duration: spinDuration,
                     ease: 'Linear',
                     onComplete: () => {
-                        reel.y = this.startY + rowIndex * (this.reelHeight + this.ySpacing);
+                        reel.y = this.startY + rowIndex * (this.reelHeight + this.ySpacing) + this.reelHeight / 2;
                         this.randomizeReel(reel);
                     }
                 });
@@ -161,7 +161,7 @@ export class SlotMachineScene extends Phaser.Scene {
                         duration: spinDuration,
                         ease: easing,
                         onComplete: () => {
-                            reel.y = this.startY + rowIndex * (this.reelHeight + this.ySpacing);
+                            reel.y = this.startY + rowIndex * (this.reelHeight + this.ySpacing) + this.reelHeight / 2;
                             this.randomizeReel(reel);
                             if (rowIndex === 2 && colIndex === 2) { // All reels have stopped
                                 this.checkWinningCombination();

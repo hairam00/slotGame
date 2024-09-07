@@ -16,7 +16,7 @@ export class SlotMachineComponent implements OnInit, OnDestroy {
     this.config = {
       type: Phaser.AUTO,
       width: 1900,
-      height: 940,
+      height: 840,
       scene: SlotMachineScene // Use the custom scene here
     };
   }
