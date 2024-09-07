@@ -15,9 +15,10 @@ export class SlotMachineScene extends Phaser.Scene {
         ['symbol2', 'symbol2', 'symbol2'],
         ['symbol3', 'symbol3', 'symbol3']
     ];
-    private winningRatio: number = 100;
+    private winningRatio: number = 50;
     private credits: number = 1000;
-    private betAmount: number = 10;
+    private betAmount: number = 0.40;
+    private betAmountText!: Phaser.GameObjects.Text;
 
     private spinButton!: Phaser.GameObjects.Sprite;
     private creditsBox!: Phaser.GameObjects.Graphics;
@@ -46,6 +47,7 @@ export class SlotMachineScene extends Phaser.Scene {
         this.initializeReels();
         this.addSpinButton();
         this.createCreditsBox();
+        this.createBetControls();  // Create bet controls (without images)
         this.updateCreditsDisplay();
     }
 
@@ -104,9 +106,9 @@ export class SlotMachineScene extends Phaser.Scene {
     }
     
     private createCreditsBox(): void {
-        const boxWidth = 200;
-        const boxHeight = 100;
-        const boxX = 20; // Positioned at the bottom-left corner
+        const boxWidth = 250;
+        const boxHeight = 50;
+        const boxX = 10; // Positioned at the bottom-left corner
         const boxY = this.cameras.main.height - boxHeight - 20;
 
         // Create a box with casino-themed design
@@ -125,7 +127,61 @@ export class SlotMachineScene extends Phaser.Scene {
     }
 
     private updateCreditsDisplay(): void {
-        this.creditsText.setText(`Credits: ${this.credits}`);
+        this.credits = parseFloat(this.credits.toFixed(2)); // Round to 2 decimal places
+        this.creditsText.setText(`Credits: $${this.credits.toFixed(2)}`);
+    }
+
+    private createBetControls(): void {
+        const boxWidth = 250;
+        const boxHeight = 50;
+        const betControlY = this.cameras.main.height - boxHeight - 20;
+        const betControlX = this.cameras.main.width - boxWidth - 20;
+
+        // Create a box with a border for the bet controls
+        const betBox = this.add.graphics();
+        betBox.fillStyle(0x000000, 0.8); // Semi-transparent black background
+        betBox.fillRect(betControlX, betControlY, boxWidth, boxHeight);
+        betBox.lineStyle(4, 0xffd700, 1); // Gold border
+        betBox.strokeRect(betControlX, betControlY, boxWidth, boxHeight);
+
+        // Create the "-" button as text, positioned to the left side
+        const minusButton = this.add.text(betControlX + 20, betControlY + boxHeight / 2, '-', {
+            fontSize: '40px',
+            color: '#ff0000',
+            fontStyle: 'bold'
+        }).setOrigin(0.5, 0.5).setInteractive();
+        minusButton.on('pointerdown', () => {
+            this.adjustBetAmount(-0.10);  // Decrease the bet amount
+        });
+
+        // Create the "+" button as text, positioned to the right side
+        const plusButton = this.add.text(betControlX + boxWidth - 20, betControlY + boxHeight / 2, '+', {
+            fontSize: '40px',
+            color: '#00ff00',
+            fontStyle: 'bold'
+        }).setOrigin(0.5, 0.5).setInteractive();
+        plusButton.on('pointerdown', () => {
+            this.adjustBetAmount(0.10);  // Increase the bet amount
+        });
+
+        // Display the bet amount in the center with padding
+        this.betAmountText = this.add.text(betControlX + boxWidth / 2, betControlY + boxHeight / 2, `Bet: $${this.betAmount.toFixed(2)}`, {
+            fontSize: '24px',
+            color: '#fff',
+            fontStyle: 'bold'
+        }).setOrigin(0.5, 0.5);
+    }
+
+    private adjustBetAmount(amount: number): void {
+        const newBet = this.betAmount + amount;
+        if (newBet >= 0.10 && newBet <= this.credits) {  // Ensure bet amount is valid
+            this.betAmount = parseFloat(newBet.toFixed(2)); // Round to 2 decimal places
+            this.updateBetAmountDisplay();
+        }
+    }
+
+    private updateBetAmountDisplay(): void {
+        this.betAmountText.setText(`Bet: $${this.betAmount.toFixed(2)}`);
     }
 
     private spinReels(): void {
@@ -196,6 +252,7 @@ export class SlotMachineScene extends Phaser.Scene {
         if (isWinning) {
             console.log('You win!');
             this.credits += this.betAmount * 2; // Example: double the bet amount
+            this.credits = parseFloat(this.credits.toFixed(2)); // Round to 2 decimal places after win
         } else {
             console.log('You lose!');
         }
